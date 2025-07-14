@@ -11,14 +11,14 @@ internal static class HostingExtensions
 {
     public static WebApplication ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddRazorPages();
+			builder.Services.AddRazorPages();
 
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+			builder.Services.AddDbContext<ApplicationDbContext>(options =>
+					options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
+			builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+					.AddEntityFrameworkStores<ApplicationDbContext>()
+					.AddDefaultTokenProviders();
 
 		builder.Services
 				.AddIdentityServer(options =>
@@ -27,13 +27,18 @@ internal static class HostingExtensions
 					options.Events.RaiseInformationEvents = true;
 					options.Events.RaiseFailureEvents = true;
 					options.Events.RaiseSuccessEvents = true;
+
+					if (builder.Environment.IsEnvironment("Docker"))
+					{
+						options.IssuerUri = "http://localhost:5001";
+					}
 				})
 				.AddInMemoryIdentityResources(Config.IdentityResources)
 				.AddInMemoryApiScopes(Config.ApiScopes)
 				.AddInMemoryClients(Config.Clients)
 				.AddAspNetIdentity<ApplicationUser>()
+				.AddLicenseSummary()
 				.AddProfileService<CustomProfileService>();
-		// .AddLicenseSummary();
 
 			builder.Services.ConfigureApplicationCookie(options =>
 			{
